@@ -1,12 +1,12 @@
 SCC0250 - Computer Graphics (2024), Prof. Ricardo Marcondes Marcacini
 # Necramtfi
 ## Introduction
-- Necramtfi is a small Minecraft-like "game" written in OpenGL
+- Necramtfi is a small Minecraft-like scenario made with the library here created
 - The development was split up into two incremental phases
     - 1. Pipeline, geometric transformations, MVP structure with cameras, objects and textures
     - 2. ...
-### Phase 1
-- TODO: add youtube link to video
+### Phase 1 (Video)
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/5w5zoETEjNw/maxresdefault.jpg)](http://www.youtube.com/watch?v=5w5zoETEjNw)
 
 # Dependencies (!) and Test Environment
 - python (!) 3.11.7
