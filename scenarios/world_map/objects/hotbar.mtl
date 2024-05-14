@@ -1,0 +1,5 @@
+newmtl hotbar_unselected
+map_Kd my_tex/hotbar_unselected.png
+
+newmtl hotbar_selected
+map_Kd my_tex/hotbar_selected.png
