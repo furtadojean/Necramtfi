@@ -6,7 +6,7 @@ SCC0250 - Computer Graphics (2024), Prof. Ricardo Marcondes Marcacini
     - 1. Pipeline, geometric transformations, MVP structure with cameras, objects and textures
     - 2. ...
 ### Phase 1 (Video)
-[![IMAGE ALT TEXT](http://img.youtube.com/vi/5w5zoETEjNw/maxresdefault.jpg)](http://www.youtube.com/watch?v=5w5zoETEjNw)
+[![Phase 1 Video](http://img.youtube.com/vi/5w5zoETEjNw/maxresdefault.jpg)](http://www.youtube.com/watch?v=5w5zoETEjNw)
 
 # Dependencies (!) and Test Environment
 - python (!) 3.11.7
@@ -71,8 +71,3 @@ SCC0250 - Computer Graphics (2024), Prof. Ricardo Marcondes Marcacini
     - "minecraft TV model" (https://skfb.ly/o6POQ) by DPancito is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 - Hotbar
     - Myself
-
-
-
-# TO-DO
-- Postar video
