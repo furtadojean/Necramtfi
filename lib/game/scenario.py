@@ -29,6 +29,7 @@ class scenario:
         self.texture_bank = textures_create(500)
         self.vcoordinates = coordinates_create(3)
         self.fcoordinates = coordinates_create(2)
+        self.ncoordinates = coordinates_create(3)
 
         self.loop_break = ""
 
@@ -55,6 +56,6 @@ class scenario:
         for object in self.objects:
             object = self.objects[object]
             if not object.skip_load:
-                object.wavefront.offload(self.vcoordinates, self.fcoordinates)
-                for material in object.wavefront.material_texture:
-                    textures_load(self.texture_bank, material, object.wavefront.material_texture[material])
+                object.wavefront.offload(self.vcoordinates, self.fcoordinates, self.ncoordinates)
+                for material_name in object.wavefront.materials:
+                    textures_load(self.texture_bank, material_name, object.wavefront.materials[material_name].texture)

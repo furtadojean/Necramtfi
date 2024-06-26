@@ -1,14 +1,18 @@
-from template.game import object
+from template.game import object, luminous_object
 from template.animation import animation
 import math
 from random import random
 
 # A cat that walks around while keeping itself close to a target
-class cat(object):
+class cat(luminous_object):
     def __init__(self, gfp, target):
         super().__init__(gfp("objects/cat.obj"),
+                         tags={"external"},
                          t=(0.0,3.2,0.0),
-                         s=(0.15,0.15,0.15))
+                         s=(0.15,0.15,0.15),
+                         color=(0.55,0.27,0.47),
+                         intensity=2.0,
+                         affected_tags={"external"})
 
         self.target = target
         self.animation = walk_around_animation(self.t, 10)

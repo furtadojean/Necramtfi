@@ -23,9 +23,10 @@ def change_scenario(scenario_name):
         template.io_controller.keycontrol = sc.keycontrol
         template.io_controller.mousecontrol = sc.mousecontrol
         template.io_controller.clickcontrol = sc.clickcontrol
-        # Also updates the vertex and fragment/texture coordinate buffers
+        # Also updates the vertex fragment/texture and normal coordinate buffers
         template.vcoordinates = sc.vcoordinates
         template.fcoordinates = sc.fcoordinates
+        template.ncoordinates = sc.ncoordinates
 
         template.ready()
 

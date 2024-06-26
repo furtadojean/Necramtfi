@@ -5,6 +5,24 @@ import time
 import math
 import numpy as np
 
+class material():
+    """Represents a material and its coefficients.
+
+    Instance attributes:
+        ns: float -- specular exponent
+        ka: array[float] -- ambient lighting intensity
+        kd: array[float] -- diffuse reflection intensity
+        ks: array[float] -- specular reflection intensity
+        texture: str -- name of texture used
+    """
+    
+    def __init__(self):
+        self.ns = 0
+        self.ka = [1.0,1.0,1.0]
+        self.kd = [1.0,1.0,1.0]
+        self.ks = [1.0,1.0,1.0]
+        self.texture = ""
+
 class wavefront():
     """Reads a .obj file.
 
@@ -12,6 +30,8 @@ class wavefront():
         filepath: str -- filepath used during reading
         physical_size: float -- biggest span on an axis
         diff_from_center: array[float] -- distance from center on each axis
+        materials: dict[str:material] -- list of materials
+        change_material: array[(int, str)] -- list of materials' names and their first vertices
     Instance methods:
         offload -- moves the local info to the correct buffers
     """
@@ -27,14 +47,11 @@ class wavefront():
 
         self.diff_from_center = np.array((0.0,0.0,0.0))
 
-        self.material_texture = dict()
+        self.materials = dict()
         self._load()
 
         self.first = 0
         self.count = 0
-
-        self.first_f = 0
-        self.count_f = 0
 
         self.change_material = list()
 
@@ -42,6 +59,7 @@ class wavefront():
     def _clean(self):
         self.vertices = []
         self.textures = []
+        self.normals = []
         self.faces = []
 
     # Adapted from the class
@@ -61,13 +79,14 @@ class wavefront():
             self.textures.append(values[1:3])
 
         def usemtl():
-            global material
-            material = values[1]
+            global material_name
+            material_name = values[1]
 
         def f():
-            global material
+            global material_name
             face = []
             face_texture = []
+            face_normal = []
             for v in values[1:]:
                 w = v.split('/')
                 face.append(int(w[0]))
@@ -75,26 +94,49 @@ class wavefront():
                     face_texture.append(int(w[1]))
                 else:
                     face_texture.append(0)
+                if len(w) >= 3 and len(w[2]) > 0:
+                    face_normal.append(int(w[2]))
+                else:
+                    face_normal.append(0)
 
-            self.faces.append((face, face_texture, material))
+            self.faces.append((face, face_texture, face_normal, material_name))
 
         def vn():
-            pass
+            self.normals.append(values[1:4])
 
         def mtllib():
             parent = str(Path(self.filepath).parent) + "/"
             filepath = parent + values[1]
-            material = None
+            material_name = None
             for line in open(filepath, "r"):
                 if line.startswith('#'): continue
                 value = line.split()
                 if not value: continue
 
                 if value[0] == "newmtl":
-                    material = value[1]
+                    material_name = value[1]
+                    self.materials[material_name] = material()
 
-                if value[0] == "map_Kd":
-                    self.material_texture[material] = parent + value[1]
+                else:
+                    try:
+                        if value[0] == "map_Kd":
+                            self.materials[material_name].texture = parent + value[1]
+                        elif value[0] == "Ns":
+                            self.materials[material_name].ns = float(value[1])
+                        elif value[0] == "Ka":
+                            self.materials[material_name].ka[0] = float(value[1])
+                            self.materials[material_name].ka[1] = float(value[2])
+                            self.materials[material_name].ka[2] = float(value[3])
+                        elif value[0] == "Kd":
+                            self.materials[material_name].kd[0] = float(value[1])
+                            self.materials[material_name].kd[1] = float(value[2])
+                            self.materials[material_name].kd[2] = float(value[3])
+                        elif value[0] == "Ks":
+                            self.materials[material_name].ks[0] = float(value[1])
+                            self.materials[material_name].ks[1] = float(value[2])
+                            self.materials[material_name].ks[2] = float(value[3])
+                    except:
+                        pass
 
 
         solution = {
@@ -123,27 +165,39 @@ class wavefront():
         print("load - %s seconds" % (time.time() - start_time))
 
 
-    def offload(self, vcoordinates, fcoordinates):
+    def offload(self, vcoordinates, fcoordinates, ncoordinates):
         start_time = time.time()
         vertices_right_order = []
         textures_right_order = []
+        normals_right_order = []
 
-        material = None
+        has_normal = True
+        material_name = None
         if len(self.faces) > 0:
-            material = self.faces[0][2]
-            self.change_material.append((len(vertices_right_order), material))
+            material_name = self.faces[0][3]
+            self.change_material.append((len(vertices_right_order), material_name))
         for face in self.faces:
-            if face[2] != material:
-                material = face[2]
+            if face[3] != material_name:
+                material_name = face[3]
                 if len(face[0]) > 0:
-                    self.change_material.append((len(vertices_right_order), material))
+                    self.change_material.append((len(vertices_right_order), material_name))
             for vertex_id in face[0]:
                 vertices_right_order.append(self.vertices[vertex_id-1])
             for texture_id in face[1]:
                 textures_right_order.append(self.textures[texture_id-1])
+            for normal_id in face[2]:
+                if not has_normal:
+                    normals_right_order.append([0.0,0.0,0.0])
+                else:
+                    try:
+                        normals_right_order.append(self.normals[normal_id-1])
+                    except:
+                        normals_right_order.append([0.0,0.0,0.0])
+                        has_normal = False
 
         (self.first, self.count) = coordinates_upload(vcoordinates, vertices_right_order)
-        (self.first_f, self.count_f) = coordinates_upload(fcoordinates, textures_right_order)
+        coordinates_upload(fcoordinates, textures_right_order)
+        coordinates_upload(ncoordinates, normals_right_order)
 
         self._calculate_physical_size()
         self._calculate_diff_from_center()

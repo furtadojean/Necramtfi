@@ -1,7 +1,7 @@
-from template.game import object
+from template.game import luminous_object, object
 from lib.util.ncmat import model, translate, rotate, scale
 from lib.io.user_input import keycontrol
-from lib.io.user_input import K_0, K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9, K_PERIOD, K_COMMA, K_X, K_Y, K_Z
+from lib.io.user_input import K_0, K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9, K_PERIOD, K_COMMA, K_X, K_Y, K_Z, K_N, K_M
 from template.io_accumulators import keycontrol_accumulator
 
 import numpy as np
@@ -88,7 +88,7 @@ class hotbar_keycontrol(keycontrol_accumulator):
 # Class for the slots that appear on the bottom of the screen
 class slot(object):
     def __init__(self, filepath, t=(0.0,0.0,0.0), s=(0.10,0.10,0.10), a=(0.0,0.0,0.0), aspect_dim=0, skip_load=False):
-        super().__init__(filepath, t, s, a, skip_load=skip_load)
+        super().__init__(filepath, t, s, a, skip_load=skip_load, tags={"skip"})
         self.aspect_dim = aspect_dim
 
     def draw(self):
@@ -169,6 +169,8 @@ class selected_keycontrol(keycontrol):
             K_Z,
             K_COMMA,
             K_PERIOD,
+            K_N,
+            K_M,
         ])
 
     def on_press_function(self, window, key, scancode, action, mods):
@@ -182,6 +184,10 @@ class selected_keycontrol(keycontrol):
             self.selected_object.s -= np.array([0.05, 0.05, 0.05])
         elif key == K_PERIOD:
             self.selected_object.s += np.array([0.05, 0.05, 0.05])
+        elif key == K_N:
+            self.selected_object.var_intensity -= 0.5
+        elif key == K_M:
+            self.selected_object.var_intensity += 0.5
 
     def call_on_draw(self):
         self.selected_object.update_target_n_offset(self.camera.t, self.camera.front)
@@ -193,13 +199,15 @@ class selected_keycontrol(keycontrol):
         self.selected_object.update_object(self.currently_selected)
 
 # Class for the shared object that represents the currently selected one
-class selected_object(object):
+class selected_object(luminous_object):
     def __init__(self, target=(0.0,0.0,0.0), offset=(0.0,0.0,0.0)):
-        super().__init__("", skip_load=True)
+        super().__init__("", color=(0.0,1.0,0.0), skip_load=True)
         self.target = np.array(target)
         self.offset = np.array(offset)
         self.skip_draw = True
         self.after_t = self.t
+
+        self._intensity = 1.0
 
     def update_target_n_offset(self, target, offset):
         self.target = np.array(target)
@@ -218,9 +226,29 @@ class selected_object(object):
         self.s = np.array([1.0,1.0,1.0])/self.wavefront.physical_size
         self.a = np.array([0.0,0.0,0.0])
         self.after_t = self.target + self.offset
+        self.light_source.position = self.after_t
 
     def model(self):
         return model([[translate, self.after_t],
                       [scale, self.s],
                       [rotate, self.a],
                       [translate, self.t]])
+
+    def behavior(self):
+        super().behavior()
+        self.y_size = self.get_y_size()
+
+    def get_y_size(self):
+        try:
+            return (self.wavefront._physical_size_pc[1][1] - self.wavefront._physical_size_pc[1][0])/2 + 1
+        except:
+            return 0.0
+
+    @property
+    def var_intensity(self):
+        return self._intensity
+
+    @var_intensity.setter
+    def var_intensity(self, value):
+        self._intensity = max(value, 0.0)
+        self.light_source.intensity = self._intensity

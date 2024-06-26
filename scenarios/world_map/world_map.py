@@ -1,4 +1,4 @@
-from template.game import scenario, object
+from template.game import scenario, object, luminous_object
 from template.camera import camera_3d_keycontrol, camera_3d_mousecontrol
 from template.io_accumulators import keycontrol_accumulator
 
@@ -46,7 +46,8 @@ class world_map(scenario):
                     self.camera.t = camera_pos_copy
 
         # Day/Night cycle
-        self.skybox.a[0] += math.radians(0.05)
+        self.skybox.a[0] += math.radians(0.10)
+        self.ambient_source.intensity = 1.0 + (((math.fabs(math.degrees(self.skybox.a[0])%360/180 - 1))-1)*0.7)
 
         # Ender dragon flying
         self.enderdragon.a[0] += math.radians(0.5)
@@ -56,10 +57,16 @@ class world_map(scenario):
         gfp = self.gfp
 
         # Map
-        self.map = object(gfp("objects/gravity_falls.obj"),
+        self.external_map = object(gfp("objects/external_map.obj"),
                           t=(-21.0,-21.0,-21.0),
-                          s=(0.4,0.4,0.4))
-        self.add_object("map", self.map)
+                          s=(0.4,0.4,0.4),
+                          tags={"external"})
+        self.add_object("map", self.external_map)
+        self.internal_map = object(gfp("objects/internal_map.obj"),
+                          t=(-21.0,-21.0,-21.0),
+                          s=(0.4,0.4,0.4),
+                          tags={"internal"})
+        self.add_object("house", self.internal_map)
 
         # Cat
         self.cat = cat(gfp, self.camera)
@@ -82,19 +89,24 @@ class world_map(scenario):
         self.skybox = object(gfp("objects/skybox.obj"),
                              s=(4.0,4.0,4.0))
         self.camera.far = 1000
-        self.skybox.t = -self.map.t
+        self.skybox.t = -self.external_map.t
         self.skybox.t[1] *= 0
+        self.skybox.a[0] += math.radians(180)
         self.add_object("skybox", self.skybox)
 
         # Ender Dragon
         self.enderdragon = object(gfp("objects/enderdragon.obj"))
-        self.enderdragon.t -= self.map.t
+        self.enderdragon.t -= self.external_map.t
         self.enderdragon.t[1] *= 0.2
         self.enderdragon.t[2] += 10
         self.add_object("enderdragon", self.enderdragon)
 
         # Book
-        self.book = object(gfp("objects/book.obj"),
+        self.book = luminous_object(gfp("objects/book.obj"),
+                           tags={"internal"},
+                           color=(0.5,0.5,1.0),
+                           intensity=5.0,
+                           affected_tags={"internal"},
                            t=(2.0,-0.35,1.3),
                            s=(0.5,0.5,0.5),
                            a=(0.0,math.radians(90),0.0))
@@ -103,6 +115,7 @@ class world_map(scenario):
 
         # Miniature Castle
         self.mini_castle = object(gfp("objects/mine_castle.obj"),
+                                  tags={"internal"},
                                   t=(3.6,-0.4,0.0),
                                   a=(0.0,math.radians(180),0.0),
                                   s=(0.1,0.1,0.1))
@@ -111,6 +124,7 @@ class world_map(scenario):
 
         # Tv
         self.tv = object(gfp("objects/tv_icmc.obj"),
+                         tags={"internal"},
                          t=(1.0,-0.4,-1.7),
                          a=(0.0,math.radians(270),0.0),
                          s=(0.5,0.5,0.5))
@@ -119,6 +133,7 @@ class world_map(scenario):
 
         # Creeper
         self.creeper = object(gfp("objects/creeper.obj"),
+                              tags={"external"},
                               t=(-4.0,-0.15,-1.5),
                               a=(0.0,0.0,0.0),
                               s=(2.0,2.0,2.0))

@@ -4,9 +4,12 @@ SCC0250 - Computer Graphics (2024), Prof. Ricardo Marcondes Marcacini
 - Necramtfi is a small Minecraft-like scenario made with the library here created
 - The development was split up into two incremental phases
     - 1. Pipeline, geometric transformations, MVP structure with cameras, objects and textures
-    - 2. ...
+    - 2. Treatment of normals and material parameters, Phong reflection model (ambient, diffuse and specular)
 ### Phase 1 (Video)
 [![Phase 1 Video](http://img.youtube.com/vi/5w5zoETEjNw/maxresdefault.jpg)](http://www.youtube.com/watch?v=5w5zoETEjNw)
+
+### Phase 2 (Video)
+[![Phase 2 Video](http://img.youtube.com/vi/1qE3UyN29vg/maxresdefault.jpg)](https://www.youtube.com/watch?v=1qE3UyN29vg)
 
 # Dependencies (!) and Test Environment
 - python (!) 3.11.7
@@ -25,6 +28,7 @@ SCC0250 - Computer Graphics (2024), Prof. Ricardo Marcondes Marcacini
 - 1..6: Select hotbar object
 - XYZ: Rotate selected object
 - ,.: Scale selected object
+- NM: Change intensity of diffuse and specular reflection
 - P: Toggle poligonal mode
 - F: Toggle full screen
 - Q: Close window
