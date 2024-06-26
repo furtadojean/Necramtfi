@@ -33,7 +33,6 @@ class object:
         if "skip" not in tags:
             self.tags.add("all")
         else:
-            print("skip")
             self.tags.remove("skip")
 
         self.skip_draw = False

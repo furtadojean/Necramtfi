@@ -41,10 +41,6 @@ class template:
         self._setup_mvp()
         self._setup_lighting()
 
-        print(self.vertex_glsl.code)
-        print(self.fragment_glsl.code)
-        #exit()
-
         self.pipeline.vertex_shader(self.vertex_glsl)
         self.pipeline.fragment_shader(self.fragment_glsl)
         self.pipeline.ready()
